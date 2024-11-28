@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo</title>
+  <style>
+    /* 배경에 더 영롱하고 아름다운 그라디언트 적용 */
+    body {
+      font-family: Arial, '맑은 고딕', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fad0c4, #ff9a9e); /* 부드럽고 화려한 그라디언트 */
+      background-size: 400% 400%; /* 그라디언트 크기를 크게 만들어 더 많은 색 변화를 주기 */
+      animation: gradientAnimation 15s ease infinite; /* 그라디언트 애니메이션 */
+    }
+
+    /* 그라디언트 애니메이션 정의 */
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #todoArea {
+      background: rgba(255, 255, 255, 0.9); /* 반투명 배경으로 부드러운 효과 */
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: 50px auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    #todoList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      margin-bottom: 16px;
+    }
+
+    #todoList li {
+      margin-bottom: 8px;
+      border-radius: 5px;
+      background: #fff;
+      padding: 8px;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #todoList li:hover {
+      background: #e3cecf;
+    }
+
+    /* 날짜와 메모를 flex로 정렬 */
+    .todoItem {
+      display: flex;
+      justify-content: space-between; /* 왼쪽은 날짜, 오른쪽은 todo */
+      align-items: center;
+      width: 100%;
+    }
+
+    .todoItem .date {
+      font-size: 0.9em;
+      color: #555;
+      width: 30%; /* 날짜가 왼쪽에 고정되도록 설정 */
+    } 
+
+    .todoItem .todo {
+      flex-grow: 1; /* 할 일은 남은 공간을 모두 차지 */
+      text-align: left; /* 할 일 텍스트 왼쪽 정렬 */
+    }
+
+    .todoItem .checkbox {
+      margin-left: 10px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      border: 2px solid #cf6ffc; /* 기본 border 색상 */
+      background-color: #fff; /* 기본 배경색 */
+      appearance: none; /* 기본 체크박스 스타일 제거 */
+      position: relative;
+    }
+
+    /* 체크박스 선택 시 색상 변경 */
+    .todoItem .checkbox:checked {
+      background-color: #cf6ffc; /* 선택된 배경색 */
+      border-color: #cf6ffc; /* 선택된 border 색상 */
+    }
+
+    /* 체크박스의 체크 표시 (없애기) */
+    .todoItem .checkbox:checked::after {
+      content: ''; /* 체크 표시 없애기 */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #inputArea {
+      display: flex;
+      justify-content: space-between; /* 입력란에서 날짜는 왼쪽, 할 일은 오른쪽 */
+      margin-bottom: 10px;
+    }
+
+    #memoArea, #dateArea {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 45%; /* 각 입력란의 폭을 45%로 설정 */
+    }
+
+    #memoArea {
+      margin-right: 10px; /* 할 일 입력란과 날짜 입력란 사이에 여백 */
+    }
+
+    #setMemo {
+      padding: 8px 16px;
+      background: #000000;
+      color: #fff;
+      border: 0 none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    #setMemo:hover {
+      background: #cf6ffc;
+    }
+
+    .deleteBtn {
+      padding: 4px 8px;
+      background: #cf6ffc;
+      color: #fff;
+      border: 0 none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .deleteBtn:hover {
+      background: #000000;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    /* 저장 버튼 스타일 */
+    #saveToFile {
+      padding: 8px 16px;
+      background: #000000;
+      color: #fff;
+      border: 0 none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+
+    #saveToFile:hover {
+      background: #cf6ffc;
+    }
+  </style>
+</head>
+<body>
+  <div id="todoArea">
+    <h1>TodoList</h1>
+    <ul id="todoList"></ul>
+    <div id="inputArea">
+      <input type="date" id="dateArea"> <!-- 날짜 입력란 -->
+      <input type="text" id="memoArea" placeholder="Enter your list."> <!-- 할 일 입력란 -->
+      <button type="button" id="setMemo">Save</button>
+    </div>
+    <button id="saveToFile">Save to File</button> <!-- 저장 버튼 -->
+  </div>
+
+  <script>
+    const todoList = document.getElementById('todoList');
+    const textArea = document.getElementById('memoArea');
+    const dateArea = document.getElementById('dateArea');
+    const editBtn = document.getElementById('setMemo');
+    const saveToFileBtn = document.getElementById('saveToFile');
+    
+    // localStorage에서 저장된 할 일 목록 가져오기
+    const getSaveMemo = () => {
+      const todoMemoJSON = localStorage.getItem('todoMemo');
+      try {
+        return todoMemoJSON ? JSON.parse(todoMemoJSON) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    let todoMemo = getSaveMemo();
+
+    // 할 일 목록 렌더링
+    const renderTodoList = () => {
+      todoList.innerText = "";
+      for (let i = 0; i < todoMemo.length; i++) {
+        let li = document.createElement("li");
+        
+        // todoItem 클래스를 사용해 날짜와 메모를 flex로 정렬
+        let todoItem = document.createElement('div');
+        todoItem.classList.add('todoItem');
+        
+        // 체크박스 추가
+        let checkbox = document.createElement('input');
+        checkbox.type = "checkbox";
+        checkbox.classList.add('checkbox');
+        checkbox.checked = todoMemo[i].completed;
+        
+        todoItem.innerHTML = `<span class="date">${todoMemo[i].date}</span>
+                              <span class="todo ${todoMemo[i].completed ? 'completed' : ''}">${todoMemo[i].memo}</span>
+                              <button class="deleteBtn">Delete</button>`;
+        
+        todoItem.prepend(checkbox); // 체크박스를 할 일 항목 앞에 추가
+        li.appendChild(todoItem);
+        todoList.appendChild(li);
+
+        // 체크박스 클릭 시 할 일 완료 상태 변경
+        checkbox.addEventListener("click", () => {
+          todoMemo[i].completed = checkbox.checked;
+          localStorage.setItem("todoMemo", JSON.stringify(todoMemo));
+          renderTodoList();
+        });
+
+        // 삭제 버튼 클릭 시 할 일 삭제
+        li.querySelector('.deleteBtn').addEventListener("click", () => {
+          todoMemo.splice(i, 1);
+          localStorage.setItem("todoMemo", JSON.stringify(todoMemo));
+          renderTodoList();
+        });
+      }
+    }
+
+    // 할 일 추가
+    const todoListAdd = () => {
+      const newMemo = textArea.value.trim();
+      const newDate = dateArea.value;
+
+      if (newMemo && newDate) {
+        todoMemo.push({ memo: newMemo, date: newDate, completed: false });
+        localStorage.setItem("todoMemo", JSON.stringify(todoMemo));
+        renderTodoList();
+        textArea.value = "";
+        dateArea.value = "";
+      } else {
+        alert("Please enter both a task and a due date.");
+      }
+    }
+
+    // 저장 버튼 클릭 시 할 일 추가
+    editBtn.addEventListener('click', todoListAdd);
+
+    // Enter 키 입력 시 할 일 추가
+    textArea.addEventListener('keypress', (e) => {
+      if (e.key === "Enter") {
+        todoListAdd();
+      }
+    });
+
+    // 파일로 저장하기
+    saveToFileBtn.addEventListener('click', () => {
+      let fileContent = "Todo List:\n\n";
+      todoMemo.forEach(item => {
+        fileContent += `${item.date} - ${item.memo}\n`;
+      });
+
+      const blob = new Blob([fileContent], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = "todo_list.txt"; // 다운로드할 파일 이름
+      link.click();
+    });
+
+    // 초기 렌더링
+    renderTodoList();
+  </script>
+</body>
+</html>
